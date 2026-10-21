@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-heading: 'Fraunces', Georgia, serif;
+    --font-body: 'Figtree', system-ui, -apple-system, sans-serif;
+    
+    /* Default brand palette */
+    --color-bg: #F2F6F6;
+    --color-accent-sage: #5E8C84;
+    --color-blush: #EEDDE0;
+    --color-light-sage: #DCE8E4;
+    --color-slate-text: #26343C;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: var(--color-bg);
+    color: var(--color-slate-text);
+  }
+
+  h1, h2, h3, h4, .font-serif-brand {
+    font-family: var(--font-heading);
+  }
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #DCE8E4;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #5E8C84;
+}
+
+/* iPhone titanium reflection */
+.titanium-frame {
+  box-shadow: 
+    0 0 0 1px rgba(255, 255, 255, 0.4) inset,
+    0 20px 40px -15px rgba(38, 52, 60, 0.25),
+    0 0 0 4px #8B9490,
+    0 0 0 8px #CCD5D2;
+}
+
+/* Shimmer animation for card invitation elements */
+@keyframes softPulse {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+.animate-soft-pulse {
+  animation: softPulse 4s ease-in-out infinite;
+}
+
+/* Floating animation for decorative petals / sparkles */
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(3deg); }
+}
+
+.animate-float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Polyfill/shim to allow extensions and test harnesses to safely override window.fetch
+      // even when the environment defines fetch as a getter-only accessor on Window.
+      (function() {
+        try {
+          var origFetch = window.fetch;
+          var fetchHolder = typeof origFetch === 'function' ? origFetch.bind(window) : origFetch;
+          Object.defineProperty(window, 'fetch', {
+            configurable: true,
+            enumerable: true,
+            get: function() {
+              return fetchHolder;
+            },
+            set: function(val) {
+              fetchHolder = val;
+            }
+          });
+        } catch (e) {
+          try {
+            var protoFetch = Window.prototype.fetch;
+            var protoHolder = typeof protoFetch === 'function' ? protoFetch.bind(window) : protoFetch;
+            Object.defineProperty(Window.prototype, 'fetch', {
+              configurable: true,
+              enumerable: true,
+              get: function() {
+                return protoHolder;
+              },
+              set: function(val) {
+                protoHolder = val;
+              }
+            });
+          } catch (e2) {
+            // ignore fallback error
+          }
+        }
+      })();
+    </script>
+    <title>MIT Invitations — Digital Invitations & Animated Templates</title>
+    <meta name="description" content="Boutique digital invitation and template shop featuring interactive mobile mockups, instant WhatsApp ordering, and a full administrative design studio." />
+    <meta property="og:title" content="MIT Invitations — Digital Invitations & Animated Templates" />
+    <meta property="og:description" content="Boutique digital invitation and template shop featuring interactive mobile mockups, instant WhatsApp ordering, and a full administrative design studio." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    
+    <!-- Google Fonts: Fraunces, Figtree, and Curated Invitation Typography & Urdu -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Allura&family=Amiri:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400..900&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Dancing+Script:wght@400..700&family=Figtree:ital,wght@0,300..900;1,300..900&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Great+Vibes&family=Lora:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Nastaliq+Urdu:wght@400..700&family=Pinyon+Script&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-[#F2F6F6] text-[#26343C] antialiased selection:bg-[#DCE8E4] selection:text-[#26343C]">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

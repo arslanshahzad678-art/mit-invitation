@@ -1,0 +1,8 @@
+{
+  "name": "Remix MIT Invitations",
+  "description": "Boutique digital invitation and template shop featuring interactive mobile mockups, instant WhatsApp ordering, and a full administrative design studio.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,193 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Digital invitation suite or motion template",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 200 },
+        "slug": { "type": "string", "maxLength": 200 },
+        "subtitle": { "type": "string", "maxLength": 300 },
+        "description": { "type": "string", "maxLength": 5000 },
+        "categoryId": { "type": "string", "maxLength": 128 },
+        "regularPrice": { "type": "number" },
+        "salePrice": { "type": "number" },
+        "featured": { "type": "boolean" },
+        "isNew": { "type": "boolean" },
+        "bestseller": { "type": "boolean" },
+        "customBadge": { "type": "string", "maxLength": 50 },
+        "hasSecondScreen": { "type": "boolean" },
+        "secondScreenImage": { "type": "string", "maxLength": 2048 },
+        "secondScreenVideo": { "type": "string", "maxLength": 2048 },
+        "secondScreenTitle": { "type": "string", "maxLength": 100 },
+        "status": { "type": "string", "enum": ["published", "draft"] },
+        "order": { "type": "number" },
+        "features": { "type": "array" },
+        "previewVideo": { "type": "string", "maxLength": 2048 },
+        "previewPoster": { "type": "string", "maxLength": 2048 },
+        "image": { "type": "string", "maxLength": 2048 },
+        "gallery": { "type": "array" },
+        "updatedAt": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "name", "slug", "regularPrice", "status"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Invitation category classification",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 100 },
+        "slug": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "iconName": { "type": "string", "maxLength": 50 },
+        "order": { "type": "number" }
+      },
+      "required": ["id", "name", "slug"]
+    },
+    "PageSection": {
+      "title": "PageSection",
+      "description": "Dynamic homepage section configuration",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "type": { "type": "string", "maxLength": 50 },
+        "title": { "type": "string", "maxLength": 200 },
+        "subtitle": { "type": "string", "maxLength": 1000 },
+        "badge": { "type": "string", "maxLength": 100 },
+        "isVisible": { "type": "boolean" },
+        "order": { "type": "number" }
+      },
+      "required": ["id", "type", "title", "isVisible", "order"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Customer testimonial or review",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "authorName": { "type": "string", "maxLength": 100 },
+        "eventType": { "type": "string", "maxLength": 100 },
+        "rating": { "type": "number" },
+        "text": { "type": "string", "maxLength": 2000 },
+        "date": { "type": "string", "maxLength": 50 },
+        "verified": { "type": "boolean" },
+        "avatarUrl": { "type": "string", "maxLength": 2048 }
+      },
+      "required": ["id", "authorName", "rating", "text"]
+    },
+    "FAQItem": {
+      "title": "FAQItem",
+      "description": "Frequently asked question entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "question": { "type": "string", "maxLength": 500 },
+        "answer": { "type": "string", "maxLength": 5000 },
+        "category": { "type": "string", "maxLength": 50 },
+        "order": { "type": "number" }
+      },
+      "required": ["id", "question", "answer"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer digital invitation order",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "orderNumber": { "type": "string", "maxLength": 50 },
+        "createdAt": { "type": "string", "maxLength": 100 },
+        "customerName": { "type": "string", "maxLength": 150 },
+        "customerEmail": { "type": "string", "maxLength": 254 },
+        "customerPhone": { "type": "string", "maxLength": 50 },
+        "eventDate": { "type": "string", "maxLength": 50 },
+        "notes": { "type": "string", "maxLength": 5000 },
+        "items": { "type": "array" },
+        "total": { "type": "number" },
+        "status": { "type": "string", "enum": ["new", "confirmed", "in_progress", "completed", "cancelled"] }
+      },
+      "required": ["id", "orderNumber", "customerName", "customerEmail", "customerPhone", "items", "total", "status"]
+    },
+    "DesignSettings": {
+      "title": "DesignSettings",
+      "description": "Branding, typography, and styling configuration",
+      "type": "object",
+      "properties": {
+        "brandName": { "type": "string", "maxLength": 100 },
+        "tagline": { "type": "string", "maxLength": 300 },
+        "logoUrl": { "type": "string", "maxLength": 2048 },
+        "primaryColor": { "type": "string", "maxLength": 20 },
+        "secondaryColor": { "type": "string", "maxLength": 20 },
+        "blushColor": { "type": "string", "maxLength": 20 },
+        "backgroundColor": { "type": "string", "maxLength": 20 },
+        "textColor": { "type": "string", "maxLength": 20 },
+        "headingFont": { "type": "string", "maxLength": 50 },
+        "bodyFont": { "type": "string", "maxLength": 50 },
+        "buttonRadius": { "type": "string", "maxLength": 20 },
+        "buttonStyle": { "type": "string", "maxLength": 20 },
+        "heroBadgeText": { "type": "string", "maxLength": 100 },
+        "heroTitle": { "type": "string", "maxLength": 300 },
+        "heroSubtitle": { "type": "string", "maxLength": 1000 },
+        "heroVideoUrl": { "type": "string", "maxLength": 2048 },
+        "heroPosterUrl": { "type": "string", "maxLength": 2048 }
+      },
+      "required": ["brandName"]
+    },
+    "StoreSettings": {
+      "title": "StoreSettings",
+      "description": "WhatsApp, contact details, currency, and announcement settings",
+      "type": "object",
+      "properties": {
+        "whatsAppNumber": { "type": "string", "maxLength": 50 },
+        "email": { "type": "string", "maxLength": 254 },
+        "phone": { "type": "string", "maxLength": 50 },
+        "address": { "type": "string", "maxLength": 300 },
+        "workingHours": { "type": "string", "maxLength": 200 },
+        "instagram": { "type": "string", "maxLength": 500 },
+        "pinterest": { "type": "string", "maxLength": 500 },
+        "tiktok": { "type": "string", "maxLength": 500 },
+        "facebook": { "type": "string", "maxLength": 500 },
+        "currencySymbol": { "type": "string", "maxLength": 10 },
+        "announcementText": { "type": "string", "maxLength": 500 },
+        "showAnnouncement": { "type": "boolean" }
+      },
+      "required": ["whatsAppNumber", "phone", "email"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Digital invitations and motion suites collection"
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Invitation categories"
+    },
+    "/sections/{sectionId}": {
+      "schema": { "$ref": "#/entities/PageSection" },
+      "description": "Homepage dynamic sections"
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Client reviews and feedback"
+    },
+    "/faqs/{faqId}": {
+      "schema": { "$ref": "#/entities/FAQItem" },
+      "description": "Frequently asked questions"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Customer order requests"
+    },
+    "/settings/design": {
+      "schema": { "$ref": "#/entities/DesignSettings" },
+      "description": "Brand aesthetic and theme settings"
+    },
+    "/settings/store": {
+      "schema": { "$ref": "#/entities/StoreSettings" },
+      "description": "Concierge WhatsApp and store settings"
+    }
+  }
+}
