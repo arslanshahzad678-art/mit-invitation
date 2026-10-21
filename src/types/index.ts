@@ -130,6 +130,27 @@ export interface DesignSettings {
   heroSubtitle: string;
 }
 
+export type PaymentMethodType = 
+  | 'easypaisa' 
+  | 'jazzcash' 
+  | 'nayapay' 
+  | 'sadapay' 
+  | 'bank' 
+  | 'other';
+
+export interface PaymentMethod {
+  id: string;
+  type: PaymentMethodType;
+  customTypeName?: string;
+  accountTitle: string;
+  accountNumber: string;
+  bankName?: string;
+  iban?: string;
+  note?: string;
+  enabled: boolean;
+  order: number;
+}
+
 export interface StoreSettings {
   whatsAppNumber: string; // e.g. "923425364018"
   email: string;
@@ -143,7 +164,9 @@ export interface StoreSettings {
   currencySymbol: string;
   announcementText: string;
   showAnnouncement: boolean;
-  // Manual Payment Settings (JazzCash, Easypaisa, Bank Transfer)
+  // Flexible Payment Methods
+  paymentMethods?: PaymentMethod[];
+  // Legacy Manual Payment Settings (JazzCash, Easypaisa, Bank Transfer)
   jazzcashNumber?: string;
   jazzcashTitle?: string;
   easypaisaNumber?: string;

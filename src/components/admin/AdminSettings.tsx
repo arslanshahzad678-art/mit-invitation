@@ -7,6 +7,7 @@ import {
   requestPasswordReset, 
   getFriendlyAuthErrorMessage 
 } from '../../services/firebaseAuth';
+import { PaymentMethodsManager } from './PaymentMethodsManager';
 import { 
   Settings, 
   MessageCircle, 
@@ -368,6 +369,9 @@ export const AdminSettings: React.FC = () => {
           </div>
         </div>
       </form>
+
+      {/* PAYMENT METHODS MANAGER */}
+      <PaymentMethodsManager />
 
       {/* SECURITY CARD (IMPORTANT: Firebase Authentication & Password Management) */}
       <div className="p-6 sm:p-8 bg-white rounded-3xl border border-[#DCE8E4] shadow-xs space-y-6">

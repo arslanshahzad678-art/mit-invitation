@@ -208,7 +208,8 @@ export interface Invitation {
   rsvpConfig?: RsvpConfig;
   status: 'draft' | 'pending_payment' | 'paid' | 'live' | 'disabled';
   paymentApproved: boolean;
-  paymentMethod?: 'jazzcash' | 'easypaisa' | 'bank' | 'other';
+  paymentMethod?: 'jazzcash' | 'easypaisa' | 'bank' | 'other' | string;
+  paymentMethodChosen?: string; // chosen by client during checkout/pending payment
   paymentReference?: string;
   createdAt: string;
   updatedAt: string;

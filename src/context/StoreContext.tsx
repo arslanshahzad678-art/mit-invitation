@@ -17,6 +17,7 @@ import { exportAllMedia, importSerializedMedia } from '../services/mediaStorage'
 import { User, onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth, testConnection } from '../config/firebase';
 import { isAuthorizedEmail, logoutAdminFirebase } from '../services/firebaseAuth';
+import { migrateLegacyPaymentSettings } from '../services/paymentService';
 
 interface ToastMessage {
   id: string;
@@ -428,6 +429,9 @@ export const StoreProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const unsubStore = firestoreService.subscribeStoreSettings((cloudStore) => {
         if (cloudStore) {
           const rebranded = dataService.rebrandDeep(cloudStore);
+          if (!rebranded.paymentMethods || rebranded.paymentMethods.length === 0) {
+            rebranded.paymentMethods = migrateLegacyPaymentSettings(rebranded);
+          }
           setStoreSettings(rebranded);
           dataService.saveStoreSettings(rebranded);
         }

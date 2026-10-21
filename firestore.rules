@@ -171,8 +171,13 @@ service cloud.firestore {
     // 11. Invitations Collection
     match /invitations/{invitationId} {
       allow get, list: if true;
-      allow create: if true;
-      allow update: if true;
+      // Clients can create invitations in pending_payment or draft state without paymentApproved
+      allow create: if isAuthorizedAdmin() || incoming().paymentApproved == false || !('paymentApproved' in incoming());
+      // Only authorized admin can approve payment; clients can never flip paymentApproved to true
+      allow update: if isAuthorizedAdmin() || (
+        (!('paymentApproved' in incoming()) || incoming().paymentApproved == existing().paymentApproved) &&
+        (incoming().status != 'live' || existing().status == 'live')
+      );
       allow delete: if isAuthorizedAdmin();
 
       // Guest RSVPs Subcollection (Guests submit responses, host and admin view)

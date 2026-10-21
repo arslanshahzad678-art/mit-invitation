@@ -8,6 +8,7 @@ import {
   DesignSettings, 
   StoreSettings 
 } from '../types';
+import { DEFAULT_PAYMENT_METHODS, migrateLegacyPaymentSettings } from './paymentService';
 
 export const STORAGE_KEYS = {
   PRODUCTS: 'mit_products_v1',
@@ -82,6 +83,7 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   currencySymbol: '$',
   announcementText: '✨ Complimentary 24-Hour Express Delivery on all Digital Wedding Suites',
   showAnnouncement: true,
+  paymentMethods: DEFAULT_PAYMENT_METHODS,
 };
 
 const DEFAULT_CATEGORIES: Category[] = [
@@ -650,6 +652,11 @@ export function initializeDataLayer(): void {
       currentSettings.facebook = 'https://facebook.com/mitinvitations';
       changed = true;
     }
+    // Migrate legacy payment fields to flexible paymentMethods
+    if (!currentSettings.paymentMethods || currentSettings.paymentMethods.length === 0) {
+      currentSettings.paymentMethods = migrateLegacyPaymentSettings(currentSettings);
+      changed = true;
+    }
     if (changed) {
       writeStorage(STORAGE_KEYS.STORE_SETTINGS, currentSettings);
     }
@@ -930,9 +937,17 @@ export function resetDesignSettings(): DesignSettings {
 export function getStoreSettings(): StoreSettings {
   initializeDataLayer();
   const settings = readStorage<StoreSettings>(STORAGE_KEYS.STORE_SETTINGS, DEFAULT_STORE_SETTINGS);
+  let changed = false;
   if (settings.whatsAppNumber === '15550198234' || !settings.whatsAppNumber) {
     settings.whatsAppNumber = '923425364018';
     settings.phone = '+92 342 5364018';
+    changed = true;
+  }
+  if (!settings.paymentMethods || settings.paymentMethods.length === 0) {
+    settings.paymentMethods = migrateLegacyPaymentSettings(settings);
+    changed = true;
+  }
+  if (changed) {
     writeStorage(STORAGE_KEYS.STORE_SETTINGS, settings);
   }
   return settings;

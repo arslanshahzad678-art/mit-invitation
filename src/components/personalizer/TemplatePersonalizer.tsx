@@ -4,6 +4,7 @@ import {
   Invitation, 
   TemplateField 
 } from '../../types/invitation';
+import { PaymentMethod } from '../../types';
 import { 
   getTemplate, 
   listTemplates, 
@@ -14,9 +15,14 @@ import {
   generateSlugSuggestions, 
   uploadInvitationMedia 
 } from '../../services/invitationService';
+import { 
+  getPaymentMethodBadgeConfig, 
+  buildWhatsAppPaymentMessage 
+} from '../../services/paymentService';
 import { createSeedTemplate } from '../../services/seedTemplateService';
 import { useStore } from '../../context/StoreContext';
 import { ElementRenderer } from '../canvas/ElementRenderer';
+import { PaymentMethodsView } from '../payment/PaymentMethodsView';
 import { auth } from '../../config/firebase';
 import { 
   Sparkles, 
@@ -37,7 +43,8 @@ import {
   ChevronLeft,
   Lock,
   ExternalLink,
-  RefreshCw
+  RefreshCw,
+  CreditCard
 } from 'lucide-react';
 
 export const TemplatePersonalizer: React.FC = () => {
@@ -45,7 +52,8 @@ export const TemplatePersonalizer: React.FC = () => {
     customizeTemplateId, 
     navigate, 
     showToast, 
-    storeSettings 
+    storeSettings,
+    products
   } = useStore();
 
   const [template, setTemplate] = useState<InvitationTemplate | null>(null);
@@ -60,6 +68,7 @@ export const TemplatePersonalizer: React.FC = () => {
   const [slugSuggestions, setSlugSuggestions] = useState<string[]>([]);
   const [countdownEnabled, setCountdownEnabled] = useState(true);
   const [rsvpEnabled, setRsvpEnabled] = useState(true);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
 
   // Uploading state
   const [uploadingField, setUploadingField] = useState<string | null>(null);
@@ -154,7 +163,7 @@ export const TemplatePersonalizer: React.FC = () => {
     }
   };
 
-  const handleOrderWhatsApp = async () => {
+  const handleOrderWhatsApp = async (overrideMethod?: PaymentMethod) => {
     if (!template) return;
     if (slugStatus === 'taken') {
       showToast('Please choose an available URL slug for your invitation link.', 'error');
@@ -170,6 +179,24 @@ export const TemplatePersonalizer: React.FC = () => {
 
       const cleanSlug = formatSlug(slug) || `mit-${Date.now().toString().slice(-6)}`;
 
+      // Calculate linked product price
+      const linkedProd = products.find(
+        (p) => p.id === template.productId || p.templateId === template.id
+      );
+      const templatePrice = linkedProd?.salePrice ?? linkedProd?.regularPrice ?? 38;
+
+      // Method chosen
+      const methodToUse =
+        overrideMethod ||
+        selectedPaymentMethod ||
+        storeSettings.paymentMethods?.filter((m) => m.enabled)[0];
+
+      let methodDesc = 'Manual Payment';
+      if (methodToUse) {
+        const badge = getPaymentMethodBadgeConfig(methodToUse.type, methodToUse.customTypeName);
+        methodDesc = `${badge.label} (${methodToUse.accountTitle} - ${methodToUse.accountNumber || methodToUse.iban || ''})`;
+      }
+
       const newInvitation: Invitation = {
         id: invId,
         slug: cleanSlug,
@@ -183,6 +210,8 @@ export const TemplatePersonalizer: React.FC = () => {
         rsvpEnabled,
         status: 'pending_payment',
         paymentApproved: false,
+        paymentMethodChosen: methodDesc,
+        paymentMethod: methodToUse?.type || 'easypaisa',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         deleted: false,
@@ -190,24 +219,22 @@ export const TemplatePersonalizer: React.FC = () => {
 
       await createInvitation(newInvitation);
 
-      // WhatsApp Order message
-      const phone = storeSettings.whatsAppNumber || '+923425364018';
-      const cleanPhone = phone.replace(/[^0-9]/g, '');
+      // WhatsApp Order message with chosen payment method
       const couple = `${formData.groomName || 'Couple'} & ${formData.brideName || ''}`;
-      const msg = `*New Invitation Suite Order - MIT Invitations*\n\n` +
-        `• Suite: ${template.name}\n` +
-        `• Couple: ${couple}\n` +
-        `• Event Date: ${formData.eventDate || 'N/A'}\n` +
-        `• Venue: ${formData.venueName || 'N/A'}, ${formData.venueCity || ''}\n` +
-        `• Requested Custom Link: mitinvitations.com/i/${cleanSlug}\n` +
-        `• Font: ${fontChoice}\n` +
-        `• Invitation ID: ${invId}\n\n` +
-        `I have customized my wedding suite and would like to confirm my order & payment details (JazzCash / Easypaisa / Bank Transfer). Thank you!`;
+      const waUrl = buildWhatsAppPaymentMessage({
+        whatsAppNumber: storeSettings.whatsAppNumber,
+        invitationId: invId,
+        templateName: template.name,
+        clientEmail: ownerEmail,
+        paymentMethodChosen: methodDesc,
+        coupleName: couple,
+        amount: templatePrice,
+        currencySymbol: storeSettings.currencySymbol,
+      });
 
-      const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
-      window.open(waUrl, '_blank');
+      window.open(waUrl, '_blank', 'noopener,noreferrer');
 
-      showToast('Invitation saved! Opening WhatsApp to finalize order.', 'success');
+      showToast('Invitation suite saved! Opening WhatsApp with payment confirmation.', 'success');
       navigate('portal');
     } catch (err) {
       console.error('Error saving invitation:', err);
@@ -275,7 +302,7 @@ export const TemplatePersonalizer: React.FC = () => {
         {/* Desktop WhatsApp Action */}
         <div className="hidden sm:flex items-center gap-3">
           <button
-            onClick={handleOrderWhatsApp}
+            onClick={() => handleOrderWhatsApp()}
             disabled={isSubmitting}
             className="px-5 py-2.5 bg-[#5E8C84] hover:bg-[#4d756e] text-white text-xs font-semibold rounded-xl shadow-xs transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
           >
@@ -597,20 +624,42 @@ export const TemplatePersonalizer: React.FC = () => {
             )}
           </section>
 
-          {/* Bottom WhatsApp Order CTA */}
-          <div className="pt-2">
-            <button
-              onClick={handleOrderWhatsApp}
-              disabled={isSubmitting}
-              className="w-full py-3.5 bg-[#5E8C84] hover:bg-[#4d756e] text-white font-semibold rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 text-sm"
-            >
-              <MessageCircle className="w-4 h-4 fill-white/20" />
-              <span>{isSubmitting ? 'Saving Suite...' : 'Save & Order on WhatsApp'}</span>
-            </button>
-            <p className="text-center text-[11px] text-[#26343C]/60 mt-2">
-              Pay manually via JazzCash, Easypaisa, or Bank Transfer. Our team approves and activates your suite immediately.
-            </p>
-          </div>
+          {/* Card 6: Payment Methods & Order Confirmation */}
+          {(() => {
+            const linkedProd = products.find(
+              (p) => p.id === template.productId || p.templateId === template.id
+            );
+            const templatePrice = linkedProd?.salePrice ?? linkedProd?.regularPrice ?? 38;
+
+            return (
+              <section className="bg-white p-6 rounded-3xl border border-[#DCE8E4] shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-[#DCE8E4]">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-[#26343C]">
+                    <CreditCard className="w-4 h-4 text-[#5E8C84]" />
+                    <span>Payment Methods & Order Confirmation</span>
+                  </div>
+                  <span className="text-[11px] font-semibold text-[#5E8C84] bg-[#DCE8E4]/50 px-2.5 py-0.5 rounded-full">
+                    Final Step
+                  </span>
+                </div>
+
+                <p className="text-xs text-[#26343C]/70">
+                  Select your preferred payment method below, copy the account details, and send your receipt screenshot directly to our studio on WhatsApp for instant activation.
+                </p>
+
+                <PaymentMethodsView
+                  price={templatePrice}
+                  templateName={template.name}
+                  clientEmail={auth.currentUser?.email || formData.customerEmail || 'client@mitinvitations.com'}
+                  coupleName={`${formData.groomName || 'Couple'} & ${formData.brideName || ''}`}
+                  selectedMethodId={selectedPaymentMethod?.id}
+                  onSelectMethod={(method) => setSelectedPaymentMethod(method)}
+                  onWhatsAppClick={(method) => handleOrderWhatsApp(method)}
+                  showWhatsAppButton={true}
+                />
+              </section>
+            );
+          })()}
 
         </div>
 

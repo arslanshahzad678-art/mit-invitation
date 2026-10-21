@@ -31,7 +31,8 @@ import {
   Phone,
   Mail,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  CreditCard
 } from 'lucide-react';
 
 export const AdminInvitations: React.FC = () => {
@@ -284,6 +285,18 @@ export const AdminInvitations: React.FC = () => {
                         <Clock className="w-3 h-3" /> Payment Verification Needed
                       </span>
                     )}
+
+                    {inv.paymentMethodChosen ? (
+                      <span className="text-[10px] font-semibold text-slate-800 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-300 flex items-center gap-1 shadow-2xs">
+                        <CreditCard className="w-3 h-3 text-[#5E8C84]" />
+                        <span>Paid via: <strong className="text-[#26343C]">{inv.paymentMethodChosen}</strong></span>
+                      </span>
+                    ) : inv.paymentMethod ? (
+                      <span className="text-[10px] font-semibold text-slate-800 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-300 flex items-center gap-1 uppercase shadow-2xs">
+                        <CreditCard className="w-3 h-3 text-[#5E8C84]" />
+                        <span>Paid via: <strong className="text-[#26343C]">{inv.paymentMethod}</strong></span>
+                      </span>
+                    ) : null}
 
                     <span className="text-xs text-[#26343C]/40">·</span>
                     <span className="text-xs text-[#26343C]/60 font-mono">

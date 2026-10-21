@@ -6,6 +6,7 @@ import {
 import { 
   listMyInvitations, 
   listAllInvitations,
+  updateInvitation,
   listGuests, 
   addGuest, 
   updateGuest, 
@@ -39,11 +40,14 @@ import {
   Heart,
   Phone,
   Mail,
-  FileText
+  FileText,
+  Clock
 } from 'lucide-react';
+import { PaymentMethodsView } from '../payment/PaymentMethodsView';
+import { getPaymentMethodBadgeConfig } from '../../services/paymentService';
 
 export const ClientPortal: React.FC = () => {
-  const { navigate, showToast, storeSettings } = useStore();
+  const { navigate, showToast, storeSettings, products } = useStore();
   const [currentUser, setCurrentUser] = useState<User | null>(auth.currentUser);
   const [authChecking, setAuthChecking] = useState(true);
 
@@ -423,6 +427,71 @@ export const ClientPortal: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Pending Payment & Verification Card */}
+      {activeInvitation && (!activeInvitation.paymentApproved || activeInvitation.status === 'pending_payment') && (() => {
+        const linkedProd = products.find(
+          (p) => p.id === activeInvitation.templateId || p.templateId === activeInvitation.templateId
+        );
+        const templatePrice = linkedProd?.salePrice ?? linkedProd?.regularPrice ?? 38;
+
+        return (
+          <div className="bg-white rounded-3xl border-2 border-amber-300 p-6 sm:p-8 shadow-xs space-y-5 animate-in fade-in duration-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#DCE8E4]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                  <Clock className="w-5 h-5 stroke-[2.2]" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-serif-brand text-lg font-semibold text-[#26343C]">
+                      Pending Payment & Studio Activation
+                    </h3>
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-300">
+                      Action Required
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#26343C]/70">
+                    To activate your public link and unlock guest RSVPs, complete your transfer using any enabled payment method below, then tap &ldquo;Send Payment Screenshot on WhatsApp&rdquo;.
+                  </p>
+                </div>
+              </div>
+
+              {activeInvitation.paymentMethodChosen && (
+                <span className="text-xs text-[#5E8C84] bg-[#DCE8E4]/50 px-3 py-1 rounded-full font-semibold self-start sm:self-auto">
+                  Selected: {activeInvitation.paymentMethodChosen}
+                </span>
+              )}
+            </div>
+
+            {/* Payment Methods Component */}
+            <PaymentMethodsView
+              price={templatePrice}
+              invitationId={activeInvitation.id}
+              templateName="Digital Wedding Suite"
+              clientEmail={currentUser?.email || activeInvitation.ownerEmail}
+              coupleName={`${activeInvitation.data?.groomName || 'Couple'} & ${activeInvitation.data?.brideName || ''}`}
+              onSelectMethod={async (method) => {
+                const badge = getPaymentMethodBadgeConfig(method.type, method.customTypeName);
+                const desc = `${badge.label} (${method.accountTitle} - ${method.accountNumber || method.iban || ''})`;
+                const updated: Invitation = {
+                  ...activeInvitation,
+                  paymentMethodChosen: desc,
+                  paymentMethod: method.type,
+                };
+                setActiveInvitation(updated);
+                try {
+                  await updateInvitation(updated, `Payment method updated to ${badge.label}`);
+                  showToast(`Selected payment method: ${badge.label}`, 'info');
+                } catch (err) {
+                  console.error('Failed to update payment method choice:', err);
+                }
+              }}
+              showWhatsAppButton={true}
+            />
+          </div>
+        );
+      })()}
 
       {/* RSVP Summary Statistics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
